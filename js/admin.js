@@ -4,7 +4,7 @@
 // authentication (the spec explicitly says full auth isn't required).
 // Firestore security rules are the real protection layer; see README.md.
 // Change this password before deploying.
-const ADMIN_PASSWORD = "juanitoreyes2026";
+const ADMIN_PASSWORD = "niggersexcock6767";
 
 import { $, renderTopbar, toCSV, downloadCSV, formatTimestamp } from "./util.js";
 import { LESSONS } from "./data.js";
