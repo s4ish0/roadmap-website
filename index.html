@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodePath — Java Programming Fundamentals</title>
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<div id="topbar" class="topbar"></div>
+
+<main class="container">
+  <div class="page-head">
+    <span class="eyebrow">Gov. Juanito Reyes Remulla SHS · ICT–Programming</span>
+    <h1>Welcome to CodePath</h1>
+    <p class="lede">A roadmap-guided way to learn Java programming fundamentals — variables
+    and data types, control structures, and functions — one lesson at a time.</p>
+  </div>
+
+  <div id="intro-card" class="card" style="display:none;">
+    <h2>Before you start</h2>
+    <p>This site is part of a research study on programming instruction at your school.
+    You'll be asked for an anonymized student code (never your full name), take a short
+    baseline test, then work through five short lessons in order. Each lesson unlocks the
+    next once you pass its two short assessments.</p>
+
+    <form id="intake-form">
+      <label for="studentId">Anonymized student code</label>
+      <input type="text" id="studentId" placeholder="e.g., S-014" required>
+      <p class="hint">Use the code given by your teacher, not your real name.</p>
+
+      <label for="gradeSection">Grade &amp; section</label>
+      <input type="text" id="gradeSection" placeholder="e.g., Grade 12 - ICT 3" required>
+
+      <label for="sex">Sex</label>
+      <select id="sex" required>
+        <option value="" disabled selected>Select one</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Prefer not to say">Prefer not to say</option>
+      </select>
+
+      <label for="priorExposure">Have you studied or practiced any programming language before?</label>
+      <select id="priorExposure" required>
+        <option value="" disabled selected>Select one</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label class="radio-option" style="margin-top:18px;">
+        <input type="checkbox" id="consent" required>
+        <span>I confirm that informed consent to take part in this research has been secured
+        (by me and/or my parent/guardian, as required by my school).</span>
+      </label>
+
+      <div id="intake-error" class="banner error" style="display:none;"></div>
+
+      <div class="btn-row">
+        <button type="submit" class="btn amber block">Continue</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="loading" class="loading">Checking your progress…</div>
+</main>
+
+<div class="site-footer">CodePath · Roadmap-guided learning tool for a Grade 12 action research study</div>
+
+<script type="module">
+import { renderTopbar, $ } from "./js/util.js";
+import { getStudentId, setStudentId, createOrGetStudent, fetchStudent } from "./js/store.js";
+
+renderTopbar(getStudentId());
+
+async function routeExistingStudent(id) {
+  const student = await fetchStudent(id);
+  if (!student) { showIntake(); return; }
+  if (!student.preTest) {
+    window.location.href = "./pretest.html";
+  } else {
+    window.location.href = "./roadmap.html";
+  }
+}
+
+function showIntake() {
+  $("#loading").style.display = "none";
+  $("#intro-card").style.display = "block";
+}
+
+const existingId = getStudentId();
+if (existingId) {
+  routeExistingStudent(existingId).catch(err => {
+    console.error(err);
+    showIntake();
+  });
+} else {
+  showIntake();
+}
+
+$("#intake-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorBox = $("#intake-error");
+  errorBox.style.display = "none";
+
+  const studentId = $("#studentId").value.trim();
+  const gradeSection = $("#gradeSection").value.trim();
+  const sex = $("#sex").value;
+  const priorExposure = $("#priorExposure").value;
+
+  if (!studentId || !gradeSection || !sex || !priorExposure) {
+    errorBox.textContent = "Please fill in every field.";
+    errorBox.style.display = "block";
+    return;
+  }
+
+  const submitBtn = e.target.querySelector("button[type=submit]");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Please wait…";
+
+  try {
+    const student = await createOrGetStudent({
+      studentId, section: gradeSection, sex, gradeSection, priorExposure
+    });
+    setStudentId(student.id);
+    if (!student.preTest) {
+      window.location.href = "./pretest.html";
+    } else {
+      window.location.href = "./roadmap.html";
+    }
+  } catch (err) {
+    console.error(err);
+    errorBox.textContent = "Something went wrong saving your info. Please check your internet connection and try again.";
+    errorBox.style.display = "block";
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Continue";
+  }
+});
+</script>
+</body>
+</html>

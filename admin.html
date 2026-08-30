@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Researcher View — CodePath</title>
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<div id="topbar" class="topbar"></div>
+<main class="container">
+
+  <div id="gate" class="page-head">
+    <span class="eyebrow">Restricted</span>
+    <h1>Researcher View</h1>
+    <p class="lede">Enter the access password to view and export study data.</p>
+    <form id="gate-form" class="card" style="max-width:380px;">
+      <label for="gate-password">Password</label>
+      <input type="password" id="gate-password" required>
+      <div id="gate-error" class="banner error" style="display:none;">Incorrect password.</div>
+      <div class="btn-row">
+        <button type="submit" class="btn amber block">Unlock</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="dashboard" style="display:none;"></div>
+
+</main>
+<div class="site-footer">CodePath · Roadmap-guided learning tool for a Grade 12 action research study</div>
+<script type="module" src="./js/admin.js"></script>
+</body>
+</html>

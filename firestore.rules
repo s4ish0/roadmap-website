@@ -1,0 +1,55 @@
+rules_version = '2';
+
+// Example rules for the CodePath study site.
+// No Firebase Authentication is used, so these rules rely on document
+// shape/ownership-by-ID rather than an auth token. This is appropriate
+// for a short classroom study behind an unlisted URL, not for a public,
+// adversarial deployment.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // One document per anonymized student code.
+    match /students/{studentId} {
+      allow create: if isValidStudent(request.resource.data);
+      allow update: if isValidStudent(request.resource.data)
+                    && request.resource.data.studentId == resource.data.studentId;
+      // Reading is left open so admin.html can list all students for
+      // export. For a stricter deployment, remove this and instead read
+      // through a small authenticated Cloud Function or the Firebase
+      // console itself.
+      allow read: if true;
+      allow delete: if false;
+    }
+
+    // One row per assessment attempt. Never edited after creation.
+    match /attempts/{attemptId} {
+      allow create: if isValidAttempt(request.resource.data);
+      allow read: if true;
+      allow update, delete: if false;
+    }
+
+    // One document per student holding their survey answers.
+    match /surveyResponses/{studentId} {
+      allow create, update: if request.resource.data.studentId == studentId
+                             && request.resource.data.responses is list;
+      allow read: if true;
+      allow delete: if false;
+    }
+  }
+}
+
+function isValidStudent(data) {
+  return data.studentId is string
+      && data.studentId.size() > 0
+      && data.sex is string
+      && data.gradeSection is string
+      && data.priorExposure is string;
+}
+
+function isValidAttempt(data) {
+  return data.studentId is string
+      && data.lesson is int
+      && data.type in ['qa', 'programming']
+      && data.percent is number;
+}
